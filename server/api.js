@@ -1,3 +1,6 @@
+const pino = require("pino"); 
+const logger = pino(); 
+
 const initializeAPI = async (app) => {
   app.post("/api/login", login);
 };
@@ -10,6 +13,8 @@ const login = async (req, res) => {
     <p>Username: ${username}</p>
     <p>Password: ${password}</p>
   `;
+
+  logger.info(`Login request received for username: ${username}`);
 
   res.send(answer);
 };

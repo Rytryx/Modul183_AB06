@@ -2,23 +2,36 @@ const express = require("express");
 const http = require("http");
 const { initializeAPI } = require("./api");
 
-// Create the express server
-const app = express();
-app.use(express.json());
-const server = http.createServer(app);
+const expressPino = require("express-pino-logger");
 
-// deliver static files from the client folder like css, js, images
+const rotatingFileStream = require("./.request-log");
+
+
+const pino = require('pino-http')()
+
+app.use(pino)
+
+app.get('/', function (req, res) {
+  req.log.info('something')
+  res.send('hello world')
+})
+
+app.listen(3000)
+
+const app = express();
+const logger = pino(rotatingFileStream); 
+app.use(express.json());
+app.use(expressPino({ logger }));
+
 app.use(express.static("client"));
-// route for the homepage
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/client/index.html");
 });
 
-// Initialize the REST api
 initializeAPI(app);
 
-//start the web server
 const serverPort = 3000;
+const server = http.createServer(app);
 server.listen(serverPort, () => {
   console.log(`Express Server started on port ${serverPort}`);
 });
